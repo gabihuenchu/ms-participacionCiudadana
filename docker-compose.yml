@@ -1,0 +1,34 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: catastrofescl_citizen
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - citizen_pg_data:/var/lib/postgresql/data
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  ms-citizen:
+    build: .
+    ports:
+      - "8084:8084"
+    environment:
+      DATABASE_URL: jdbc:postgresql://postgres:5432/catastrofescl_citizen
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: postgres
+      RABBITMQ_HOST: rabbitmq
+      FIREBASE_ENABLED: "false"
+    depends_on:
+      - postgres
+      - rabbitmq
+
+volumes:
+  citizen_pg_data:

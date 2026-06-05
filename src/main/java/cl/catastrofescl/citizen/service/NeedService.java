@@ -1,0 +1,145 @@
+package cl.catastrofescl.citizen.service;
+
+import cl.catastrofescl.citizen.dto.request.CreateNeedRequest;
+import cl.catastrofescl.citizen.dto.response.NeedResponse;
+import cl.catastrofescl.citizen.dto.response.PageResponse;
+import cl.catastrofescl.citizen.entity.EstadoNecesidad;
+import cl.catastrofescl.citizen.entity.Necesidad;
+import cl.catastrofescl.citizen.entity.OrigenNecesidad;
+import cl.catastrofescl.citizen.entity.PrioridadNecesidad;
+import cl.catastrofescl.citizen.event.NeedCreatedEvent;
+import cl.catastrofescl.citizen.event.StockCriticalEvent;
+import cl.catastrofescl.citizen.exception.DuplicateNeedException;
+import cl.catastrofescl.citizen.repository.NeedRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+public class NeedService {
+
+    private static final List<EstadoNecesidad> ESTADOS_PUBLICOS = List.of(
+            EstadoNecesidad.ACTIVA,
+            EstadoNecesidad.PARCIALMENTE_CUBIERTA
+    );
+
+    private final NeedRepository needRepository;
+    private final NeedMapper needMapper;
+    private final EventPublisher eventPublisher;
+
+    @Transactional(readOnly = true)
+    public PageResponse<NeedResponse> listarPublicas(int page, int size) {
+        PageRequest pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "prioridad", "creadaEn"));
+        Page<Necesidad> result = needRepository.findByEstadoIn(ESTADOS_PUBLICOS, pageable);
+        return toPageResponse(result);
+    }
+
+    @Transactional(readOnly = true)
+    public List<NeedResponse> listarPorCentro(UUID centroId) {
+        return needRepository.findByCentroIdAndEstadoIn(centroId, ESTADOS_PUBLICOS).stream()
+                .map(needMapper::toResponse)
+                .toList();
+    }
+
+    @Transactional
+    public NeedResponse crearManual(CreateNeedRequest request) {
+        return crearNecesidad(
+                request.centroId(),
+                request.itemId(),
+                request.emergenciaId(),
+                request.cantidadNecesaria(),
+                request.prioridad(),
+                OrigenNecesidad.MANUAL
+        );
+    }
+
+    @Transactional
+    public NeedResponse crearAutomatica(StockCriticalEvent event) {
+        PrioridadNecesidad prioridad = mapearPrioridad(event.nivelCriticidad());
+        int cantidad = event.cantidadSugerida() != null && event.cantidadSugerida() > 0
+                ? event.cantidadSugerida()
+                : 1;
+
+        if (needRepository.existsByCentroIdAndItemIdAndEstadoIn(
+                event.centroId(), event.itemId(), ESTADOS_PUBLICOS)) {
+            throw new DuplicateNeedException(event.centroId(), event.itemId());
+        }
+
+        return crearNecesidad(
+                event.centroId(),
+                event.itemId(),
+                event.emergenciaId(),
+                cantidad,
+                prioridad,
+                OrigenNecesidad.AUTOMATICO
+        );
+    }
+
+    private NeedResponse crearNecesidad(
+            UUID centroId,
+            UUID itemId,
+            UUID emergenciaId,
+            int cantidad,
+            PrioridadNecesidad prioridad,
+            OrigenNecesidad origen
+    ) {
+        OffsetDateTime ahora = OffsetDateTime.now();
+        Necesidad necesidad = Necesidad.builder()
+                .id(UUID.randomUUID())
+                .centroId(centroId)
+                .itemId(itemId)
+                .emergenciaId(emergenciaId)
+                .cantidadNecesaria(cantidad)
+                .prioridad(prioridad)
+                .origen(origen)
+                .estado(EstadoNecesidad.ACTIVA)
+                .creadaEn(ahora)
+                .build();
+
+        Necesidad guardada = needRepository.save(necesidad);
+
+        eventPublisher.publicar("need.created", new NeedCreatedEvent(
+                UUID.randomUUID(),
+                guardada.getId(),
+                guardada.getCentroId(),
+                guardada.getItemId(),
+                guardada.getEmergenciaId(),
+                guardada.getCantidadNecesaria(),
+                guardada.getPrioridad(),
+                guardada.getOrigen(),
+                guardada.getCreadaEn()
+        ));
+
+        return needMapper.toResponse(guardada);
+    }
+
+    private PrioridadNecesidad mapearPrioridad(String nivelCriticidad) {
+        if (nivelCriticidad == null) {
+            return PrioridadNecesidad.ALTO;
+        }
+        return switch (nivelCriticidad.toUpperCase()) {
+            case "AGOTADO", "CRITICO" -> PrioridadNecesidad.CRITICO;
+            case "ALTO" -> PrioridadNecesidad.ALTO;
+            case "MEDIO" -> PrioridadNecesidad.MEDIO;
+            default -> PrioridadNecesidad.BAJO;
+        };
+    }
+
+    private PageResponse<NeedResponse> toPageResponse(Page<Necesidad> page) {
+        return new PageResponse<>(
+                page.getContent().stream().map(needMapper::toResponse).toList(),
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages()
+        );
+    }
+}
