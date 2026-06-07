@@ -5,7 +5,7 @@ import cl.catastrofescl.citizen.entity.Necesidad;
 import org.springframework.stereotype.Component;
 
 @Component
-public class NeedMapper {
+public class NecesidadMapper {
 
     public NeedResponse toResponse(Necesidad necesidad) {
         return new NeedResponse(

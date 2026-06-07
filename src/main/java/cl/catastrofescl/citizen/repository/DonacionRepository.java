@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface DonationRepository extends JpaRepository<Donacion, UUID> {
+public interface DonacionRepository extends JpaRepository<Donacion, UUID> {
 
     Optional<Donacion> findByCodigoQr(String codigoQr);
 

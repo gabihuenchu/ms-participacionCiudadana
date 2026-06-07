@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.UUID;
 
-public interface NeedRepository extends JpaRepository<Necesidad, UUID> {
+public interface NecesidadRepository extends JpaRepository<Necesidad, UUID> {
 
     Page<Necesidad> findByEstadoIn(List<EstadoNecesidad> estados, Pageable pageable);
 

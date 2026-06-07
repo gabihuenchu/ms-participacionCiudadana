@@ -2,7 +2,7 @@ package cl.catastrofescl.citizen.event;
 
 import cl.catastrofescl.citizen.config.RabbitMQConfig;
 import cl.catastrofescl.citizen.exception.DuplicateNeedException;
-import cl.catastrofescl.citizen.service.NeedService;
+import cl.catastrofescl.citizen.service.NecesidadService;
 import com.rabbitmq.client.Channel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +19,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class StockCriticalConsumer {
 
-    private final NeedService needService;
+    private final NecesidadService necesidadService;
 
     @RabbitListener(queues = RabbitMQConfig.STOCK_CRITICAL_QUEUE)
     public void consumirStockCritical(
@@ -28,7 +28,7 @@ public class StockCriticalConsumer {
             @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag
     ) throws IOException {
         try {
-            needService.crearAutomatica(event);
+            necesidadService.crearAutomatica(event);
             channel.basicAck(deliveryTag, false);
             log.info("Necesidad automática creada desde stock.critical para centro {} ítem {}",
                     event.centroId(), event.itemId());

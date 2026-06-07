@@ -84,23 +84,29 @@ GET  /donaciones/mis-contribuciones → panel de impacto
 
 ```
 src/main/java/cl/catastrofescl/citizen/
-├── controller/     NeedController, DonationController
-├── service/        NeedService, DonationService
+├── controller/     NecesidadController, DonacionController
+├── service/        NecesidadService, DonacionService
 ├── entity/         Necesidad, Donacion, ItemDonacion
 ├── event/          RabbitMQ consumers y payloads
 ├── config/         Security, RabbitMQ, Firebase
 └── exception/      RFC 7807 ProblemDetail
+
+document/           CLAUDE.md, plan, errores, avances, arreglos
 ```
 
 ## Tests
 
 ```bash
-mvn test
+# Requiere Java 21 en PATH y System32 accesible (para mvnw)
+.\mvnw.cmd test
 ```
 
 ## Docker
 
+El Dockerfile compila el proyecto dentro de Docker (multi-stage). No necesitas `mvn package` previo:
+
 ```bash
-mvn package -DskipTests
 docker compose up --build
 ```
+
+PostgreSQL expone el puerto **5433** en el host (internamente `5432`).

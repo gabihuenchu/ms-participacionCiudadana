@@ -1,21 +1,21 @@
-package cl.catastrofescl.citizen;
+package cl.catastrofescl.citizen.integration;
 
 import cl.catastrofescl.citizen.dto.request.CreateDonationRequest;
 import cl.catastrofescl.citizen.dto.request.DonationItemRequest;
 import cl.catastrofescl.citizen.entity.EstadoDonacion;
-import cl.catastrofescl.citizen.service.DonationService;
+import cl.catastrofescl.citizen.service.DonacionService;
+import cl.catastrofescl.citizen.service.EventPublisher;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import cl.catastrofescl.citizen.service.EventPublisher;
 
 import java.util.List;
 import java.util.UUID;
@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @Testcontainers
 @ActiveProfiles("test")
-class DonationFlowIntegrationTest {
+class DonacionFlowIntegrationTest {
 
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine")
@@ -49,7 +49,7 @@ class DonationFlowIntegrationTest {
     private EventPublisher eventPublisher;
 
     @Autowired
-    private DonationService donationService;
+    private DonacionService donacionService;
 
     @Test
     void registrarYConfirmarDonacion_generaCodigoQrYConfirma() {
@@ -63,12 +63,12 @@ class DonationFlowIntegrationTest {
                 List.of(new DonationItemRequest(itemId, 5))
         );
 
-        var creada = donationService.registrar(request, donanteId);
+        var creada = donacionService.registrar(request, donanteId);
         assertThat(creada.codigoQr()).isNotBlank();
         assertThat(creada.estado()).isEqualTo(EstadoDonacion.PENDIENTE);
         assertThat(creada.items()).hasSize(1);
 
-        var confirmada = donationService.confirmar(creada.codigoQr(), operadorId);
+        var confirmada = donacionService.confirmar(creada.codigoQr(), operadorId);
         assertThat(confirmada.estado()).isEqualTo(EstadoDonacion.CONFIRMADA);
         assertThat(confirmada.confirmadoPorUsuarioId()).isEqualTo(operadorId);
     }
