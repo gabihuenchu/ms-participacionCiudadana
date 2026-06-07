@@ -96,9 +96,27 @@ document/           CLAUDE.md, plan, errores, avances, arreglos
 
 ## Tests
 
-```bash
-# Requiere Java 21 en PATH y System32 accesible (para mvnw)
+```powershell
+# Unitarios (Mockito + JUnit 5) — no requiere Docker
+$env:PATH = "C:\Windows\System32;" + $env:PATH
 .\mvnw.cmd test
+```
+
+**18 tests unitarios** en `src/test/java/.../unit/`:
+
+| Clase | Qué prueba |
+|-------|------------|
+| `NecesidadServiceTest` | Crear necesidad, duplicados, listado público |
+| `DonacionServiceTest` | Registrar, confirmar, errores, paginación |
+| `NecesidadControllerTest` | Endpoints públicos HTTP |
+| `DonacionControllerTest` | Auth dev + permisos RBAC |
+| `GlobalExceptionHandlerTest` | Formato RFC 7807 |
+| `StockCriticalConsumerTest` | Consumidor RabbitMQ (ack/nack) |
+
+**Integración** (Testcontainers — requiere Docker Desktop):
+
+```powershell
+.\mvnw.cmd test -Pintegration
 ```
 
 ## Docker

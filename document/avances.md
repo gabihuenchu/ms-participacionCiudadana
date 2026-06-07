@@ -6,8 +6,8 @@
 | Flyway / BD | ✅ |
 | RabbitMQ productor/consumidor | ✅ |
 | Seguridad Firebase + dev | ✅ |
-| Tests unitarios | 🔄 |
-| Tests integración | 🔄 |
+| Tests unitarios | ✅ (18 tests Mockito/JUnit) |
+| Tests integración | 🔄 (requiere Docker: `mvn test -Pintegration`) |
 | Gateway routing | ✅ (repo ms-gateway) |
 | Frontend hooks | ✅ (repo frontend-info) |
 | Docker local | ✅ |
