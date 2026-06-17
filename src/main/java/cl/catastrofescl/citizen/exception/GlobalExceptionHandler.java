@@ -41,6 +41,19 @@ public class GlobalExceptionHandler {
                 ex.getMessage(), "DONATION_NOT_FOUND", request);
     }
 
+    @ExceptionHandler(DonationQuantityExceededException.class)
+    public ProblemDetail handleDonationQuantityExceeded(DonationQuantityExceededException ex,
+                                                          HttpServletRequest request) {
+        return buildProblem(HttpStatus.BAD_REQUEST, "donation-quantity-exceeded",
+                "Cantidad de donación excedida", ex.getMessage(), "DONATION_QUANTITY_EXCEEDED", request);
+    }
+
+    @ExceptionHandler(ItemNotNeededException.class)
+    public ProblemDetail handleItemNotNeeded(ItemNotNeededException ex, HttpServletRequest request) {
+        return buildProblem(HttpStatus.BAD_REQUEST, "item-not-needed",
+                "Ítem no requerido", ex.getMessage(), "ITEM_NOT_NEEDED", request);
+    }
+
     @ExceptionHandler(DonationAlreadyConfirmedException.class)
     public ProblemDetail handleDonationAlreadyConfirmed(DonationAlreadyConfirmedException ex,
                                                           HttpServletRequest request) {

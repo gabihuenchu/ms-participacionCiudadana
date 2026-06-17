@@ -7,13 +7,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class NecesidadMapper {
 
-    public NeedResponse toResponse(Necesidad necesidad) {
+    public NeedResponse toResponse(Necesidad necesidad, int cantidadComprometida) {
+        int restante = Math.max(0, necesidad.getCantidadNecesaria() - cantidadComprometida);
         return new NeedResponse(
                 necesidad.getId(),
                 necesidad.getCentroId(),
                 necesidad.getItemId(),
                 necesidad.getEmergenciaId(),
                 necesidad.getCantidadNecesaria(),
+                cantidadComprometida,
+                restante,
                 necesidad.getPrioridad(),
                 necesidad.getOrigen(),
                 necesidad.getEstado(),

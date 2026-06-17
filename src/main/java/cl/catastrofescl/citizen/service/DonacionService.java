@@ -30,9 +30,17 @@ public class DonacionService {
     private final DonacionRepository donacionRepository;
     private final DonacionMapper donacionMapper;
     private final EventPublisher eventPublisher;
+    private final DonacionCapacidadService donacionCapacidadService;
 
     @Transactional
     public DonationResponse registrar(CreateDonationRequest request, UUID usuarioDonanteId) {
+        for (DonationItemRequest itemRequest : request.items()) {
+            donacionCapacidadService.validarCantidadDonacion(
+                    request.centroId(),
+                    itemRequest.itemId(),
+                    itemRequest.cantidad()
+            );
+        }
         OffsetDateTime ahora = OffsetDateTime.now();
         String codigoQr = UUID.randomUUID().toString();
 
@@ -93,6 +101,13 @@ public class DonacionService {
         donacion.setConfirmadoPorUsuarioId(operadorId);
 
         Donacion guardada = donacionRepository.save(donacion);
+
+        for (ItemDonacion item : guardada.getItems()) {
+            donacionCapacidadService.actualizarNecesidadTrasConfirmacion(
+                    guardada.getCentroId(),
+                    item.getItemId()
+            );
+        }
 
         List<DonationCreatedEvent.DonationItemPayload> itemsPayload = guardada.getItems().stream()
                 .map(i -> new DonationCreatedEvent.DonationItemPayload(i.getItemId(), i.getCantidad()))

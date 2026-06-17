@@ -53,7 +53,7 @@ class DonacionControllerTest {
 
         when(donacionService.registrar(any(), eq(USUARIO_ID))).thenReturn(new DonationResponse(
                 donacionId, centroId, USUARIO_ID, "qr-test", EstadoDonacion.PENDIENTE,
-                OffsetDateTime.now(), null, null, List.of()
+                OffsetDateTime.now(), null, null, 2, List.of()
         ));
 
         mockMvc.perform(post("/donaciones")

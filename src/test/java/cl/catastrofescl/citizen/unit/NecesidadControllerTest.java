@@ -7,6 +7,7 @@ import cl.catastrofescl.citizen.dto.response.PageResponse;
 import cl.catastrofescl.citizen.entity.EstadoNecesidad;
 import cl.catastrofescl.citizen.entity.OrigenNecesidad;
 import cl.catastrofescl.citizen.entity.PrioridadNecesidad;
+import cl.catastrofescl.citizen.service.DonacionCapacidadService;
 import cl.catastrofescl.citizen.service.NecesidadService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,9 @@ class NecesidadControllerTest {
     @MockBean
     private NecesidadService necesidadService;
 
+    @MockBean
+    private DonacionCapacidadService donacionCapacidadService;
+
     @Test
     void listarPublicas_sinAuth_retorna200() throws Exception {
         UUID id = UUID.randomUUID();
@@ -44,7 +48,7 @@ class NecesidadControllerTest {
 
         when(necesidadService.listarPublicas(0, 20)).thenReturn(new PageResponse<>(
                 List.of(new NeedResponse(
-                        id, centroId, itemId, null, 10,
+                        id, centroId, itemId, null, 10, 0, 10,
                         PrioridadNecesidad.ALTO, OrigenNecesidad.MANUAL,
                         EstadoNecesidad.ACTIVA, OffsetDateTime.now(), null
                 )),

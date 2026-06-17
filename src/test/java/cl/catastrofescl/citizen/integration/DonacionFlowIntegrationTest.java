@@ -1,9 +1,12 @@
 package cl.catastrofescl.citizen.integration;
 
 import cl.catastrofescl.citizen.dto.request.CreateDonationRequest;
+import cl.catastrofescl.citizen.dto.request.CreateNeedRequest;
 import cl.catastrofescl.citizen.dto.request.DonationItemRequest;
 import cl.catastrofescl.citizen.entity.EstadoDonacion;
+import cl.catastrofescl.citizen.entity.PrioridadNecesidad;
 import cl.catastrofescl.citizen.service.DonacionService;
+import cl.catastrofescl.citizen.service.NecesidadService;
 import cl.catastrofescl.citizen.service.EventPublisher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIf;
@@ -54,6 +57,9 @@ class DonacionFlowIntegrationTest {
     @Autowired
     private DonacionService donacionService;
 
+    @Autowired
+    private NecesidadService necesidadService;
+
     static boolean dockerDisponible() {
         return DockerClientFactory.instance().isDockerAvailable();
     }
@@ -64,6 +70,10 @@ class DonacionFlowIntegrationTest {
         UUID itemId = UUID.randomUUID();
         UUID donanteId = UUID.randomUUID();
         UUID operadorId = UUID.randomUUID();
+
+        necesidadService.crearManual(new CreateNeedRequest(
+                centroId, itemId, null, 10, PrioridadNecesidad.MEDIO
+        ));
 
         var request = new CreateDonationRequest(
                 centroId,

@@ -1,8 +1,10 @@
 package cl.catastrofescl.citizen.controller;
 
 import cl.catastrofescl.citizen.dto.request.CreateNeedRequest;
+import cl.catastrofescl.citizen.dto.response.DonationQuotaResponse;
 import cl.catastrofescl.citizen.dto.response.NeedResponse;
 import cl.catastrofescl.citizen.dto.response.PageResponse;
+import cl.catastrofescl.citizen.service.DonacionCapacidadService;
 import cl.catastrofescl.citizen.service.NecesidadService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,6 +31,7 @@ import java.util.UUID;
 public class NecesidadController {
 
     private final NecesidadService necesidadService;
+    private final DonacionCapacidadService donacionCapacidadService;
 
     @GetMapping("/publicas")
     @Operation(summary = "Listar necesidades activas visibles para la ciudadanía")
@@ -37,6 +40,12 @@ public class NecesidadController {
             @RequestParam(defaultValue = "20") int size
     ) {
         return necesidadService.listarPublicas(page, size);
+    }
+
+    @GetMapping("/centro/{centroId}/cupos-donacion")
+    @Operation(summary = "Cupos máximos de donación por ítem en un centro")
+    public List<DonationQuotaResponse> listarCuposDonacion(@PathVariable UUID centroId) {
+        return donacionCapacidadService.listarCuposPorCentro(centroId);
     }
 
     @GetMapping("/centro/{centroId}")

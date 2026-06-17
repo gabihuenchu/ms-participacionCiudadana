@@ -8,6 +8,7 @@ import cl.catastrofescl.citizen.entity.PrioridadNecesidad;
 import cl.catastrofescl.citizen.event.StockCriticalEvent;
 import cl.catastrofescl.citizen.exception.DuplicateNeedException;
 import cl.catastrofescl.citizen.repository.NecesidadRepository;
+import cl.catastrofescl.citizen.service.DonacionCapacidadService;
 import cl.catastrofescl.citizen.service.EventPublisher;
 import cl.catastrofescl.citizen.service.NecesidadMapper;
 import cl.catastrofescl.citizen.service.NecesidadService;
@@ -44,6 +45,9 @@ class NecesidadServiceTest {
     @Mock
     private EventPublisher eventPublisher;
 
+    @Mock
+    private DonacionCapacidadService donacionCapacidadService;
+
     @InjectMocks
     private NecesidadService necesidadService;
 
@@ -61,11 +65,12 @@ class NecesidadServiceTest {
         var request = new CreateNeedRequest(centroId, itemId, null, 10, PrioridadNecesidad.ALTO);
 
         when(necesidadRepository.save(any(Necesidad.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(necesidadMapper.toResponse(any(Necesidad.class))).thenAnswer(invocation -> {
+        when(necesidadMapper.toResponse(any(Necesidad.class), eq(0))).thenAnswer(invocation -> {
             Necesidad n = invocation.getArgument(0);
             return new cl.catastrofescl.citizen.dto.response.NeedResponse(
                     n.getId(), n.getCentroId(), n.getItemId(), n.getEmergenciaId(),
-                    n.getCantidadNecesaria(), n.getPrioridad(), n.getOrigen(), n.getEstado(),
+                    n.getCantidadNecesaria(), 0, n.getCantidadNecesaria(),
+                    n.getPrioridad(), n.getOrigen(), n.getEstado(),
                     n.getCreadaEn(), n.getResueltaEn()
             );
         });
@@ -104,11 +109,12 @@ class NecesidadServiceTest {
         );
         when(necesidadRepository.existsByCentroIdAndItemIdAndEstadoIn(any(), any(), any())).thenReturn(false);
         when(necesidadRepository.save(any(Necesidad.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(necesidadMapper.toResponse(any(Necesidad.class))).thenAnswer(invocation -> {
+        when(necesidadMapper.toResponse(any(Necesidad.class), eq(0))).thenAnswer(invocation -> {
             Necesidad n = invocation.getArgument(0);
             return new cl.catastrofescl.citizen.dto.response.NeedResponse(
                     n.getId(), n.getCentroId(), n.getItemId(), n.getEmergenciaId(),
-                    n.getCantidadNecesaria(), n.getPrioridad(), n.getOrigen(), n.getEstado(),
+                    n.getCantidadNecesaria(), 0, n.getCantidadNecesaria(),
+                    n.getPrioridad(), n.getOrigen(), n.getEstado(),
                     n.getCreadaEn(), n.getResueltaEn()
             );
         });
@@ -134,9 +140,10 @@ class NecesidadServiceTest {
 
         when(necesidadRepository.findByEstadoIn(any(), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(necesidad)));
-        when(necesidadMapper.toResponse(necesidad)).thenReturn(
+        when(donacionCapacidadService.calcularCantidadComprometida(centroId, itemId)).thenReturn(2);
+        when(necesidadMapper.toResponse(necesidad, 2)).thenReturn(
                 new cl.catastrofescl.citizen.dto.response.NeedResponse(
-                        necesidad.getId(), centroId, itemId, null, 5,
+                        necesidad.getId(), centroId, itemId, null, 5, 2, 3,
                         PrioridadNecesidad.MEDIO, OrigenNecesidad.MANUAL, EstadoNecesidad.ACTIVA,
                         necesidad.getCreadaEn(), null
                 )

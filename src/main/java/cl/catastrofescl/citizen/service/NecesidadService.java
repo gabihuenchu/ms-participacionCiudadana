@@ -34,6 +34,7 @@ public class NecesidadService {
     private final NecesidadRepository necesidadRepository;
     private final NecesidadMapper necesidadMapper;
     private final EventPublisher eventPublisher;
+    private final DonacionCapacidadService donacionCapacidadService;
 
     @Transactional(readOnly = true)
     public PageResponse<NeedResponse> listarPublicas(int page, int size) {
@@ -45,7 +46,10 @@ public class NecesidadService {
     @Transactional(readOnly = true)
     public List<NeedResponse> listarPorCentro(UUID centroId) {
         return necesidadRepository.findByCentroIdAndEstadoIn(centroId, ESTADOS_PUBLICOS).stream()
-                .map(necesidadMapper::toResponse)
+                .map(n -> necesidadMapper.toResponse(
+                        n,
+                        donacionCapacidadService.calcularCantidadComprometida(centroId, n.getItemId())
+                ))
                 .toList();
     }
 
@@ -118,7 +122,7 @@ public class NecesidadService {
                 guardada.getCreadaEn()
         ));
 
-        return necesidadMapper.toResponse(guardada);
+        return necesidadMapper.toResponse(guardada, 0);
     }
 
     private PrioridadNecesidad mapearPrioridad(String nivelCriticidad) {
@@ -135,7 +139,12 @@ public class NecesidadService {
 
     private PageResponse<NeedResponse> toPageResponse(Page<Necesidad> page) {
         return new PageResponse<>(
-                page.getContent().stream().map(necesidadMapper::toResponse).toList(),
+                page.getContent().stream()
+                        .map(n -> necesidadMapper.toResponse(
+                                n,
+                                donacionCapacidadService.calcularCantidadComprometida(n.getCentroId(), n.getItemId())
+                        ))
+                        .toList(),
                 page.getNumber(),
                 page.getSize(),
                 page.getTotalElements(),

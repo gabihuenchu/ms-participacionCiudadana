@@ -13,6 +13,10 @@ public record NeedResponse(
         UUID itemId,
         UUID emergenciaId,
         Integer cantidadNecesaria,
+        /** Suma de donaciones PENDIENTE + CONFIRMADA para este ítem en el centro. */
+        Integer cantidadComprometida,
+        /** Unidades que aún acepta el centro (cantidadNecesaria - cantidadComprometida). */
+        Integer cantidadRestante,
         PrioridadNecesidad prioridad,
         OrigenNecesidad origen,
         EstadoNecesidad estado,

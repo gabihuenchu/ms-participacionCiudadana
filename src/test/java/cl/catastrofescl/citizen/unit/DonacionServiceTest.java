@@ -9,6 +9,7 @@ import cl.catastrofescl.citizen.entity.ItemDonacion;
 import cl.catastrofescl.citizen.exception.DonationAlreadyConfirmedException;
 import cl.catastrofescl.citizen.exception.DonationNotFoundException;
 import cl.catastrofescl.citizen.repository.DonacionRepository;
+import cl.catastrofescl.citizen.service.DonacionCapacidadService;
 import cl.catastrofescl.citizen.service.DonacionMapper;
 import cl.catastrofescl.citizen.service.DonacionService;
 import cl.catastrofescl.citizen.service.EventPublisher;
@@ -47,6 +48,9 @@ class DonacionServiceTest {
 
     @Mock
     private EventPublisher eventPublisher;
+
+    @Mock
+    private DonacionCapacidadService donacionCapacidadService;
 
     @InjectMocks
     private DonacionService donacionService;
@@ -98,6 +102,7 @@ class DonacionServiceTest {
 
         assertThat(response.estado()).isEqualTo(EstadoDonacion.CONFIRMADA);
         assertThat(response.confirmadoPorUsuarioId()).isEqualTo(operadorId);
+        verify(donacionCapacidadService).actualizarNecesidadTrasConfirmacion(centroId, itemId);
         verify(eventPublisher).publicar(eq("donation.confirmed"), any());
     }
 
