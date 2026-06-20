@@ -7,6 +7,6 @@ import java.util.UUID;
 
 public record DonationItemRequest(
         @NotNull UUID itemId,
-        @NotNull @Min(1) Integer cantidad
+        @NotNull @Min(1) Long cantidad
 ) {
 }

@@ -7,8 +7,8 @@ public record StockCriticalEvent(
         UUID centroId,
         UUID itemId,
         UUID emergenciaId,
-        Integer stockActual,
+        Long stockActual,
         String nivelCriticidad,
-        Integer cantidadSugerida
+        Long cantidadSugerida
 ) {
 }

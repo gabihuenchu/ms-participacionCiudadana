@@ -3,6 +3,7 @@ package cl.catastrofescl.citizen.unit;
 import cl.catastrofescl.citizen.event.StockCriticalConsumer;
 import cl.catastrofescl.citizen.event.StockCriticalEvent;
 import cl.catastrofescl.citizen.exception.DuplicateNeedException;
+import cl.catastrofescl.citizen.service.IdempotenciaEventos;
 import cl.catastrofescl.citizen.service.NecesidadService;
 import com.rabbitmq.client.Channel;
 import org.junit.jupiter.api.Test;
@@ -23,6 +24,9 @@ class StockCriticalConsumerTest {
     private NecesidadService necesidadService;
 
     @Mock
+    private IdempotenciaEventos idempotenciaEventos;
+
+    @Mock
     private Channel channel;
 
     @InjectMocks
@@ -31,7 +35,7 @@ class StockCriticalConsumerTest {
     @Test
     void consumirStockCritical_procesaEventoYConfirmaAck() throws Exception {
         var event = new StockCriticalEvent(
-                UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), null, 0, "ALTO", 2
+                UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), null, 0L, "ALTO", 2L
         );
 
         consumer.consumirStockCritical(event, channel, 42L);
@@ -43,7 +47,7 @@ class StockCriticalConsumerTest {
     @Test
     void consumirStockCritical_duplicada_confirmaAckSinReencolar() throws Exception {
         var event = new StockCriticalEvent(
-                UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), null, 0, "ALTO", 2
+                UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), null, 0L, "ALTO", 2L
         );
         doThrow(new DuplicateNeedException(event.centroId(), event.itemId()))
                 .when(necesidadService).crearAutomatica(event);
@@ -56,7 +60,7 @@ class StockCriticalConsumerTest {
     @Test
     void consumirStockCritical_errorInesperado_enviaNack() throws Exception {
         var event = new StockCriticalEvent(
-                UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), null, 0, "ALTO", 2
+                UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), null, 0L, "ALTO", 2L
         );
         doThrow(new RuntimeException("fallo BD")).when(necesidadService).crearAutomatica(event);
 

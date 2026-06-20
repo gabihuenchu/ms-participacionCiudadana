@@ -6,9 +6,10 @@ spring:
     name: ms-citizen
 
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/catastrofescl_citizen}
-    username: ${DATABASE_USERNAME:postgres}
-    password: ${DATABASE_PASSWORD:postgres}
+    # BD compartida del monorepo: catastrofescl (misma que ms-resources, fuente de verdad del inventario)
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/catastrofescl}
+    username: ${DATABASE_USERNAME:catastrofescl}
+    password: ${DATABASE_PASSWORD:catastrofescl}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -23,6 +24,9 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+    table: flyway_schema_history_ms_citizen
+    baseline-on-migrate: true
+    baseline-version: "0"
 
   rabbitmq:
     host: ${RABBITMQ_HOST:localhost}
@@ -35,6 +39,11 @@ spring:
       simple:
         default-requeue-rejected: false
         acknowledge-mode: manual
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
 
 firebase:
   enabled: ${FIREBASE_ENABLED:false}

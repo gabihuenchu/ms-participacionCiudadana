@@ -6,8 +6,8 @@ import java.util.UUID;
 public record DonationQuotaResponse(
         UUID itemId,
         UUID necesidadId,
-        Integer cantidadNecesaria,
-        Integer cantidadComprometida,
-        Integer cantidadMaximaDonacion
+        Long cantidadNecesaria,
+        Long cantidadComprometida,
+        Long cantidadMaximaDonacion
 ) {
 }

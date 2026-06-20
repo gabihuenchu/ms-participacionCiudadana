@@ -48,7 +48,7 @@ class NecesidadControllerTest {
 
         when(necesidadService.listarPublicas(0, 20)).thenReturn(new PageResponse<>(
                 List.of(new NeedResponse(
-                        id, centroId, itemId, null, 10, 0, 10,
+                        id, centroId, itemId, null, 10L, 0L, 10L,
                         PrioridadNecesidad.ALTO, OrigenNecesidad.MANUAL,
                         EstadoNecesidad.ACTIVA, OffsetDateTime.now(), null
                 )),

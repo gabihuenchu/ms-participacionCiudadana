@@ -72,7 +72,7 @@ class DonacionServiceTest {
     void registrar_persisteDonacionPendienteYPublicaEvento() {
         var request = new CreateDonationRequest(
                 centroId,
-                List.of(new DonationItemRequest(itemId, 3))
+                List.of(new DonationItemRequest(itemId, 3L))
         );
 
         when(donacionRepository.save(any(Donacion.class))).thenAnswer(inv -> inv.getArgument(0));
@@ -155,7 +155,7 @@ class DonacionServiceTest {
                 .id(UUID.randomUUID())
                 .donacion(donacion)
                 .itemId(itemId)
-                .cantidad(2)
+                .cantidad(2L)
                 .build());
         return donacion;
     }

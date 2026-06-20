@@ -29,7 +29,7 @@ public interface DonacionRepository extends JpaRepository<Donacion, UUID> {
               AND i.itemId = :itemId
               AND d.estado IN :estados
             """)
-    Integer sumCantidadPorCentroItemYEstados(
+    Long sumCantidadPorCentroItemYEstados(
             @Param("centroId") UUID centroId,
             @Param("itemId") UUID itemId,
             @Param("estados") Collection<EstadoDonacion> estados

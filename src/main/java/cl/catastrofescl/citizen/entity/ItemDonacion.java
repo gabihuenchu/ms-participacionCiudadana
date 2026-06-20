@@ -35,5 +35,5 @@ public class ItemDonacion {
     private UUID itemId;
 
     @Column(nullable = false)
-    private Integer cantidad;
+    private Long cantidad;
 }
