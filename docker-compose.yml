@@ -2,7 +2,7 @@ services:
   postgres:
     image: postgres:15-alpine
     environment:
-      POSTGRES_DB: catastrofescl_citizen
+      POSTGRES_DB: catastrofecl
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
@@ -21,7 +21,7 @@ services:
     ports:
       - "8084:8084"
     environment:
-      DATABASE_URL: jdbc:postgresql://postgres:5432/catastrofescl_citizen
+      DATABASE_URL: jdbc:postgresql://postgres:5432/catastrofecl
       DATABASE_USERNAME: postgres
       DATABASE_PASSWORD: postgres
       RABBITMQ_HOST: rabbitmq

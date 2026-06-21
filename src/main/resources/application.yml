@@ -6,7 +6,7 @@ spring:
     name: ms-citizen
 
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/catastrofescl_citizen}
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/catastrofecl}
     username: ${DATABASE_USERNAME:postgres}
     password: ${DATABASE_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
@@ -22,7 +22,10 @@ spring:
 
   flyway:
     enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
     locations: classpath:db/migration
+    table: flyway_schema_history_citizen
 
   rabbitmq:
     host: ${RABBITMQ_HOST:localhost}

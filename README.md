@@ -6,7 +6,7 @@ Microservicio **MS-4** del ecosistema CatástrofesCL. Gestiona necesidades de re
 |----------|-------|
 | Puerto | `8084` |
 | Gateway | `/necesidades/**`, `/donaciones/**` → `http://ms-citizen:8084` |
-| Base de datos | `catastrofescl_citizen` (PostgreSQL) |
+| Base de datos | `catastrofecl` (PostgreSQL compartida; Flyway: `flyway_schema_history_citizen`) |
 
 ## APIs críticas
 
@@ -38,12 +38,14 @@ Microservicio **MS-4** del ecosistema CatástrofesCL. Gestiona necesidades de re
 ### Variables de entorno
 
 ```bash
-DATABASE_URL=jdbc:postgresql://localhost:5432/catastrofescl_citizen
+DATABASE_URL=jdbc:postgresql://localhost:5432/catastrofecl
 DATABASE_USERNAME=postgres
 DATABASE_PASSWORD=postgres
 RABBITMQ_HOST=localhost
 FIREBASE_ENABLED=false
 ```
+
+> En el monorepo `CATASTROFECL-MS`, Docker usa `host.docker.internal:5432/catastrofecl` vía `compose.yaml` + `compose.override.yaml`.
 
 ### Ejecutar
 
@@ -70,14 +72,14 @@ curl -X POST http://localhost:8084/donaciones \
 
 ## Integración con frontend-info
 
-El portal ciudadano (`frontend-info`) consumirá estos endpoints vía API Gateway (`NEXT_PUBLIC_API_URL`, puerto `8080`):
+El portal ciudadano (`frontend-info`) consume vía API Gateway (`NEXT_PUBLIC_API_URL`, puerto `8080`):
 
 ```typescript
-// Servicios planificados en frontend-info
-GET  /necesidades/publicas          → usePublicNeeds
-GET  /necesidades/centro/:id        → wizard paso 2
-POST /donaciones                    → DonationForm
-GET  /donaciones/mis-contribuciones → panel de impacto
+GET  /necesidades/publicas              → listado público (donantes anónimos)
+GET  /necesidades/centro/:id/cupos-donacion → cupos por ítem en un centro
+GET  /necesidades/centro/:id            → necesidades del centro
+POST /donaciones                        → registro por operadores (dashboard)
+GET  /donaciones/mis-contribuciones     → historial autenticado (operadores)
 ```
 
 ## Estructura
