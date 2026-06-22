@@ -4,7 +4,7 @@ import cl.catastrofescl.citizen.dto.request.CreateDonationRequest;
 import cl.catastrofescl.citizen.dto.response.DonationResponse;
 import cl.catastrofescl.citizen.dto.response.PageResponse;
 import cl.catastrofescl.citizen.security.UserContext;
-import cl.catastrofescl.citizen.service.DonationService;
+import cl.catastrofescl.citizen.service.DonacionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -27,16 +27,16 @@ import java.util.UUID;
 @RequestMapping("/donaciones")
 @RequiredArgsConstructor
 @Tag(name = "Donaciones", description = "Gestión de donaciones ciudadanas")
-public class DonationController {
+public class DonacionController {
 
-    private final DonationService donationService;
+    private final DonacionService donacionService;
 
     @PostMapping
     @PreAuthorize("hasAuthority('DONACION_REALIZAR')")
     @Operation(summary = "Registrar una donación realizada por un usuario")
     public ResponseEntity<DonationResponse> registrar(@Valid @RequestBody CreateDonationRequest request) {
         UUID usuarioId = UserContext.obtenerUsuarioId();
-        DonationResponse response = donationService.registrar(request, usuarioId);
+        DonationResponse response = donacionService.registrar(request, usuarioId);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .location(URI.create("/donaciones/" + response.id()))
@@ -48,7 +48,7 @@ public class DonationController {
     @Operation(summary = "Confirmar recepción de donación escaneando QR")
     public DonationResponse confirmar(@PathVariable String codigoQr) {
         UUID operadorId = UserContext.obtenerUsuarioId();
-        return donationService.confirmar(codigoQr, operadorId);
+        return donacionService.confirmar(codigoQr, operadorId);
     }
 
     @GetMapping("/mis-contribuciones")
@@ -58,6 +58,6 @@ public class DonationController {
             @RequestParam(defaultValue = "20") int size
     ) {
         UUID usuarioId = UserContext.obtenerUsuarioId();
-        return donationService.listarMisContribuciones(usuarioId, page, size);
+        return donacionService.listarMisContribuciones(usuarioId, page, size);
     }
 }

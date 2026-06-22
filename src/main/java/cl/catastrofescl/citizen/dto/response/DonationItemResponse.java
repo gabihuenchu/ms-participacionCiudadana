@@ -5,6 +5,6 @@ import java.util.UUID;
 public record DonationItemResponse(
         UUID id,
         UUID itemId,
-        Integer cantidad
+        Long cantidad
 ) {
 }

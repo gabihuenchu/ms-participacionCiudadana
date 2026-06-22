@@ -1,14 +1,15 @@
 package cl.catastrofescl.citizen.controller;
 
 import cl.catastrofescl.citizen.dto.request.CreateNeedRequest;
+import cl.catastrofescl.citizen.dto.response.DonationQuotaResponse;
 import cl.catastrofescl.citizen.dto.response.NeedResponse;
 import cl.catastrofescl.citizen.dto.response.PageResponse;
-import cl.catastrofescl.citizen.service.NeedService;
+import cl.catastrofescl.citizen.service.DonacionCapacidadService;
+import cl.catastrofescl.citizen.service.NecesidadService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,9 +28,10 @@ import java.util.UUID;
 @RequestMapping("/necesidades")
 @RequiredArgsConstructor
 @Tag(name = "Necesidades", description = "Gestión de necesidades de recursos")
-public class NeedController {
+public class NecesidadController {
 
-    private final NeedService needService;
+    private final NecesidadService necesidadService;
+    private final DonacionCapacidadService donacionCapacidadService;
 
     @GetMapping("/publicas")
     @Operation(summary = "Listar necesidades activas visibles para la ciudadanía")
@@ -37,20 +39,26 @@ public class NeedController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
     ) {
-        return needService.listarPublicas(page, size);
+        return necesidadService.listarPublicas(page, size);
+    }
+
+    @GetMapping("/centro/{centroId}/cupos-donacion")
+    @Operation(summary = "Cupos máximos de donación por ítem en un centro")
+    public List<DonationQuotaResponse> listarCuposDonacion(@PathVariable UUID centroId) {
+        return donacionCapacidadService.listarCuposPorCentro(centroId);
     }
 
     @GetMapping("/centro/{centroId}")
     @Operation(summary = "Consultar necesidades de un centro específico")
     public List<NeedResponse> listarPorCentro(@PathVariable UUID centroId) {
-        return needService.listarPorCentro(centroId);
+        return necesidadService.listarPorCentro(centroId);
     }
 
     @PostMapping
     @PreAuthorize("hasAuthority('NECESIDAD_GESTIONAR')")
     @Operation(summary = "Registrar una necesidad de recursos (manual)")
     public ResponseEntity<NeedResponse> crear(@Valid @RequestBody CreateNeedRequest request) {
-        NeedResponse response = needService.crearManual(request);
+        NeedResponse response = necesidadService.crearManual(request);
         return ResponseEntity
                 .created(URI.create("/necesidades/" + response.id()))
                 .body(response);

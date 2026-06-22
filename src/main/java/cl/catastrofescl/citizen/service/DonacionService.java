@@ -11,7 +11,7 @@ import cl.catastrofescl.citizen.event.DonationConfirmedEvent;
 import cl.catastrofescl.citizen.event.DonationCreatedEvent;
 import cl.catastrofescl.citizen.exception.DonationAlreadyConfirmedException;
 import cl.catastrofescl.citizen.exception.DonationNotFoundException;
-import cl.catastrofescl.citizen.repository.DonationRepository;
+import cl.catastrofescl.citizen.repository.DonacionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,14 +25,22 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class DonationService {
+public class DonacionService {
 
-    private final DonationRepository donationRepository;
-    private final DonationMapper donationMapper;
+    private final DonacionRepository donacionRepository;
+    private final DonacionMapper donacionMapper;
     private final EventPublisher eventPublisher;
+    private final DonacionCapacidadService donacionCapacidadService;
 
     @Transactional
     public DonationResponse registrar(CreateDonationRequest request, UUID usuarioDonanteId) {
+        for (DonationItemRequest itemRequest : request.items()) {
+            donacionCapacidadService.validarCantidadDonacion(
+                    request.centroId(),
+                    itemRequest.itemId(),
+                    itemRequest.cantidad()
+            );
+        }
         OffsetDateTime ahora = OffsetDateTime.now();
         String codigoQr = UUID.randomUUID().toString();
 
@@ -55,7 +63,7 @@ public class DonationService {
             donacion.getItems().add(item);
         }
 
-        Donacion guardada = donationRepository.save(donacion);
+        Donacion guardada = donacionRepository.save(donacion);
 
         List<DonationCreatedEvent.DonationItemPayload> itemsPayload = guardada.getItems().stream()
                 .map(i -> new DonationCreatedEvent.DonationItemPayload(i.getItemId(), i.getCantidad()))
@@ -71,12 +79,12 @@ public class DonationService {
                 guardada.getDonadoEn()
         ));
 
-        return donationMapper.toResponse(guardada);
+        return donacionMapper.toResponse(guardada);
     }
 
     @Transactional
     public DonationResponse confirmar(String codigoQr, UUID operadorId) {
-        Donacion donacion = donationRepository.findByCodigoQrWithItems(codigoQr)
+        Donacion donacion = donacionRepository.findByCodigoQrWithItems(codigoQr)
                 .orElseThrow(() -> new DonationNotFoundException(codigoQr));
 
         if (donacion.getEstado() == EstadoDonacion.CONFIRMADA) {
@@ -92,7 +100,14 @@ public class DonationService {
         donacion.setConfirmadoEn(ahora);
         donacion.setConfirmadoPorUsuarioId(operadorId);
 
-        Donacion guardada = donationRepository.save(donacion);
+        Donacion guardada = donacionRepository.save(donacion);
+
+        for (ItemDonacion item : guardada.getItems()) {
+            donacionCapacidadService.actualizarNecesidadTrasConfirmacion(
+                    guardada.getCentroId(),
+                    item.getItemId()
+            );
+        }
 
         List<DonationCreatedEvent.DonationItemPayload> itemsPayload = guardada.getItems().stream()
                 .map(i -> new DonationCreatedEvent.DonationItemPayload(i.getItemId(), i.getCantidad()))
@@ -108,15 +123,15 @@ public class DonationService {
                 guardada.getConfirmadoEn()
         ));
 
-        return donationMapper.toResponse(guardada);
+        return donacionMapper.toResponse(guardada);
     }
 
     @Transactional(readOnly = true)
     public PageResponse<DonationResponse> listarMisContribuciones(UUID usuarioId, int page, int size) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "donadoEn"));
-        Page<Donacion> result = donationRepository.findByUsuarioDonanteId(usuarioId, pageable);
+        Page<Donacion> result = donacionRepository.findByUsuarioDonanteId(usuarioId, pageable);
         return new PageResponse<>(
-                result.getContent().stream().map(donationMapper::toResponse).toList(),
+                result.getContent().stream().map(donacionMapper::toResponse).toList(),
                 result.getNumber(),
                 result.getSize(),
                 result.getTotalElements(),

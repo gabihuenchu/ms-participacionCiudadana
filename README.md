@@ -6,7 +6,7 @@ Microservicio **MS-4** del ecosistema CatástrofesCL. Gestiona necesidades de re
 |----------|-------|
 | Puerto | `8084` |
 | Gateway | `/necesidades/**`, `/donaciones/**` → `http://ms-citizen:8084` |
-| Base de datos | `catastrofescl_citizen` (PostgreSQL) |
+| Base de datos | `catastrofecl` (PostgreSQL compartida; Flyway: `flyway_schema_history_citizen`) |
 
 ## APIs críticas
 
@@ -38,12 +38,14 @@ Microservicio **MS-4** del ecosistema CatástrofesCL. Gestiona necesidades de re
 ### Variables de entorno
 
 ```bash
-DATABASE_URL=jdbc:postgresql://localhost:5432/catastrofescl_citizen
+DATABASE_URL=jdbc:postgresql://localhost:5432/catastrofecl
 DATABASE_USERNAME=postgres
 DATABASE_PASSWORD=postgres
 RABBITMQ_HOST=localhost
 FIREBASE_ENABLED=false
 ```
+
+> En el monorepo `CATASTROFECL-MS`, Docker usa `host.docker.internal:5432/catastrofecl` vía `compose.yaml` + `compose.override.yaml`.
 
 ### Ejecutar
 
@@ -70,37 +72,61 @@ curl -X POST http://localhost:8084/donaciones \
 
 ## Integración con frontend-info
 
-El portal ciudadano (`frontend-info`) consumirá estos endpoints vía API Gateway (`NEXT_PUBLIC_API_URL`, puerto `8080`):
+El portal ciudadano (`frontend-info`) consume vía API Gateway (`NEXT_PUBLIC_API_URL`, puerto `8080`):
 
 ```typescript
-// Servicios planificados en frontend-info
-GET  /necesidades/publicas          → usePublicNeeds
-GET  /necesidades/centro/:id        → wizard paso 2
-POST /donaciones                    → DonationForm
-GET  /donaciones/mis-contribuciones → panel de impacto
+GET  /necesidades/publicas              → listado público (donantes anónimos)
+GET  /necesidades/centro/:id/cupos-donacion → cupos por ítem en un centro
+GET  /necesidades/centro/:id            → necesidades del centro
+POST /donaciones                        → registro por operadores (dashboard)
+GET  /donaciones/mis-contribuciones     → historial autenticado (operadores)
 ```
 
 ## Estructura
 
 ```
 src/main/java/cl/catastrofescl/citizen/
-├── controller/     NeedController, DonationController
-├── service/        NeedService, DonationService
+├── controller/     NecesidadController, DonacionController
+├── service/        NecesidadService, DonacionService
 ├── entity/         Necesidad, Donacion, ItemDonacion
 ├── event/          RabbitMQ consumers y payloads
 ├── config/         Security, RabbitMQ, Firebase
 └── exception/      RFC 7807 ProblemDetail
+
+document/           CLAUDE.md, plan, errores, avances, arreglos
 ```
 
 ## Tests
 
-```bash
-mvn test
+```powershell
+# Unitarios (Mockito + JUnit 5) — no requiere Docker
+$env:PATH = "C:\Windows\System32;" + $env:PATH
+.\mvnw.cmd test
+```
+
+**18 tests unitarios** en `src/test/java/.../unit/`:
+
+| Clase | Qué prueba |
+|-------|------------|
+| `NecesidadServiceTest` | Crear necesidad, duplicados, listado público |
+| `DonacionServiceTest` | Registrar, confirmar, errores, paginación |
+| `NecesidadControllerTest` | Endpoints públicos HTTP |
+| `DonacionControllerTest` | Auth dev + permisos RBAC |
+| `GlobalExceptionHandlerTest` | Formato RFC 7807 |
+| `StockCriticalConsumerTest` | Consumidor RabbitMQ (ack/nack) |
+
+**Integración** (Testcontainers — requiere Docker Desktop):
+
+```powershell
+.\mvnw.cmd test -Pintegration
 ```
 
 ## Docker
 
+El Dockerfile compila el proyecto dentro de Docker (multi-stage). No necesitas `mvn package` previo:
+
 ```bash
-mvn package -DskipTests
 docker compose up --build
 ```
+
+PostgreSQL expone el puerto **5433** en el host (internamente `5432`).
