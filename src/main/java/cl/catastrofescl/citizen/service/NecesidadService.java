@@ -68,9 +68,9 @@ public class NecesidadService {
     @Transactional
     public NeedResponse crearAutomatica(StockCriticalEvent event) {
         PrioridadNecesidad prioridad = mapearPrioridad(event.nivelCriticidad());
-        int cantidad = event.cantidadSugerida() != null && event.cantidadSugerida() > 0
+        long cantidad = event.cantidadSugerida() != null && event.cantidadSugerida() > 0
                 ? event.cantidadSugerida()
-                : 1;
+                : 1L;
 
         if (necesidadRepository.existsByCentroIdAndItemIdAndEstadoIn(
                 event.centroId(), event.itemId(), ESTADOS_PUBLICOS)) {
@@ -91,7 +91,7 @@ public class NecesidadService {
             UUID centroId,
             UUID itemId,
             UUID emergenciaId,
-            int cantidad,
+            long cantidad,
             PrioridadNecesidad prioridad,
             OrigenNecesidad origen
     ) {
@@ -122,7 +122,7 @@ public class NecesidadService {
                 guardada.getCreadaEn()
         ));
 
-        return necesidadMapper.toResponse(guardada, 0);
+        return necesidadMapper.toResponse(guardada, 0L);
     }
 
     private PrioridadNecesidad mapearPrioridad(String nivelCriticidad) {

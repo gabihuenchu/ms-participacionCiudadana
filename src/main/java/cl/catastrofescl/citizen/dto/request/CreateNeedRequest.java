@@ -10,7 +10,7 @@ public record CreateNeedRequest(
         @NotNull UUID centroId,
         @NotNull UUID itemId,
         UUID emergenciaId,
-        @NotNull @Min(1) Integer cantidadNecesaria,
+        @NotNull @Min(1) Long cantidadNecesaria,
         @NotNull PrioridadNecesidad prioridad
 ) {
 }

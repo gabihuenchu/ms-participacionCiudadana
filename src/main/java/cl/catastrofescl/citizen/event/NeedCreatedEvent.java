@@ -12,7 +12,7 @@ public record NeedCreatedEvent(
         UUID centroId,
         UUID itemId,
         UUID emergenciaId,
-        Integer cantidadNecesaria,
+        Long cantidadNecesaria,
         PrioridadNecesidad prioridad,
         OrigenNecesidad origen,
         OffsetDateTime creadaEn

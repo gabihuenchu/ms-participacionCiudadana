@@ -6,6 +6,7 @@ spring:
     name: ms-citizen
 
   datasource:
+    # BD compartida del monorepo: catastrofecl (misma que ms-resources, fuente de verdad del inventario)
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/catastrofecl}
     username: ${DATABASE_USERNAME:postgres}
     password: ${DATABASE_PASSWORD:postgres}
@@ -38,6 +39,11 @@ spring:
       simple:
         default-requeue-rejected: false
         acknowledge-mode: manual
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
 
 firebase:
   enabled: ${FIREBASE_ENABLED:false}

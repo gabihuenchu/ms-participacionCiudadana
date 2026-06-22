@@ -35,7 +35,7 @@ class DonacionFlowIntegrationTest {
 
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine")
-            .withDatabaseName("catastrofescl_citizen")
+            .withDatabaseName("catastrofescl")
             .withUsername("postgres")
             .withPassword("postgres");
 
@@ -72,12 +72,12 @@ class DonacionFlowIntegrationTest {
         UUID operadorId = UUID.randomUUID();
 
         necesidadService.crearManual(new CreateNeedRequest(
-                centroId, itemId, null, 10, PrioridadNecesidad.MEDIO
+                centroId, itemId, null, 10L, PrioridadNecesidad.MEDIO
         ));
 
         var request = new CreateDonationRequest(
                 centroId,
-                List.of(new DonationItemRequest(itemId, 5))
+                List.of(new DonationItemRequest(itemId, 5L))
         );
 
         var creada = donacionService.registrar(request, donanteId);

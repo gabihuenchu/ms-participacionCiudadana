@@ -53,7 +53,7 @@ class DonacionCapacidadServiceTest {
                 .id(UUID.randomUUID())
                 .centroId(centroId)
                 .itemId(itemId)
-                .cantidadNecesaria(10)
+                .cantidadNecesaria(10L)
                 .prioridad(PrioridadNecesidad.MEDIO)
                 .origen(OrigenNecesidad.MANUAL)
                 .estado(EstadoNecesidad.ACTIVA)
@@ -75,9 +75,9 @@ class DonacionCapacidadServiceTest {
         when(necesidadRepository.findFirstByCentroIdAndItemIdAndEstadoInOrderByPrioridadDescCreadaEnDesc(
                 eq(centroId), eq(itemId), any())).thenReturn(Optional.of(necesidad));
         when(donacionRepository.sumCantidadPorCentroItemYEstados(eq(centroId), eq(itemId), any()))
-                .thenReturn(10);
+                .thenReturn(10L);
 
-        assertThatThrownBy(() -> donacionCapacidadService.validarCantidadDonacion(centroId, itemId, 1))
+        assertThatThrownBy(() -> donacionCapacidadService.validarCantidadDonacion(centroId, itemId, 1L))
                 .isInstanceOf(ItemNotNeededException.class);
     }
 
@@ -86,9 +86,9 @@ class DonacionCapacidadServiceTest {
         when(necesidadRepository.findFirstByCentroIdAndItemIdAndEstadoInOrderByPrioridadDescCreadaEnDesc(
                 eq(centroId), eq(itemId), any())).thenReturn(Optional.of(necesidad));
         when(donacionRepository.sumCantidadPorCentroItemYEstados(eq(centroId), eq(itemId), any()))
-                .thenReturn(7);
+                .thenReturn(7L);
 
-        assertThatThrownBy(() -> donacionCapacidadService.validarCantidadDonacion(centroId, itemId, 4))
+        assertThatThrownBy(() -> donacionCapacidadService.validarCantidadDonacion(centroId, itemId, 4L))
                 .isInstanceOf(DonationQuantityExceededException.class);
     }
 
@@ -97,9 +97,9 @@ class DonacionCapacidadServiceTest {
         when(necesidadRepository.findFirstByCentroIdAndItemIdAndEstadoInOrderByPrioridadDescCreadaEnDesc(
                 eq(centroId), eq(itemId), any())).thenReturn(Optional.of(necesidad));
         when(donacionRepository.sumCantidadPorCentroItemYEstados(eq(centroId), eq(itemId), any()))
-                .thenReturn(3);
+                .thenReturn(3L);
 
-        assertThat(donacionCapacidadService.calcularCantidadMaximaDonacion(centroId, itemId)).isEqualTo(7);
+        assertThat(donacionCapacidadService.calcularCantidadMaximaDonacion(centroId, itemId)).isEqualTo(7L);
     }
 
     @Test
@@ -108,7 +108,7 @@ class DonacionCapacidadServiceTest {
                 eq(centroId), eq(itemId), any())).thenReturn(Optional.of(necesidad));
         when(donacionRepository.sumCantidadPorCentroItemYEstados(
                 eq(centroId), eq(itemId), eq(List.of(EstadoDonacion.CONFIRMADA))
-        )).thenReturn(10);
+        )).thenReturn(10L);
 
         donacionCapacidadService.actualizarNecesidadTrasConfirmacion(centroId, itemId);
 

@@ -25,7 +25,7 @@ public class DonacionMapper {
                 donacion.getDonadoEn(),
                 donacion.getConfirmadoEn(),
                 donacion.getConfirmadoPorUsuarioId(),
-                items.stream().mapToInt(DonationItemResponse::cantidad).sum(),
+                items.stream().mapToLong(DonationItemResponse::cantidad).sum(),
                 items
         );
     }

@@ -42,33 +42,33 @@ public class DonacionCapacidadService {
     }
 
     @Transactional(readOnly = true)
-    public int calcularCantidadComprometida(UUID centroId, UUID itemId) {
-        Integer total = donacionRepository.sumCantidadPorCentroItemYEstados(
+    public long calcularCantidadComprometida(UUID centroId, UUID itemId) {
+        Long total = donacionRepository.sumCantidadPorCentroItemYEstados(
                 centroId, itemId, ESTADOS_COMPROMETIDOS
         );
-        return total != null ? total : 0;
+        return total != null ? total : 0L;
     }
 
     @Transactional(readOnly = true)
-    public int calcularCantidadMaximaDonacion(UUID centroId, UUID itemId) {
+    public long calcularCantidadMaximaDonacion(UUID centroId, UUID itemId) {
         return necesidadRepository
                 .findFirstByCentroIdAndItemIdAndEstadoInOrderByPrioridadDescCreadaEnDesc(
                         centroId, itemId, ESTADOS_NECESIDAD_ABIERTA
                 )
-                .map(n -> Math.max(0, n.getCantidadNecesaria() - calcularCantidadComprometida(centroId, itemId)))
-                .orElse(0);
+                .map(n -> Math.max(0L, n.getCantidadNecesaria() - calcularCantidadComprometida(centroId, itemId)))
+                .orElse(0L);
     }
 
     @Transactional(readOnly = true)
-    public void validarCantidadDonacion(UUID centroId, UUID itemId, int cantidadSolicitada) {
+    public void validarCantidadDonacion(UUID centroId, UUID itemId, long cantidadSolicitada) {
         Necesidad necesidad = necesidadRepository
                 .findFirstByCentroIdAndItemIdAndEstadoInOrderByPrioridadDescCreadaEnDesc(
                         centroId, itemId, ESTADOS_NECESIDAD_ABIERTA
                 )
                 .orElseThrow(() -> new ItemNotNeededException(centroId, itemId));
 
-        int maxima = Math.max(
-                0,
+        long maxima = Math.max(
+                0L,
                 necesidad.getCantidadNecesaria() - calcularCantidadComprometida(centroId, itemId)
         );
 
@@ -88,7 +88,7 @@ public class DonacionCapacidadService {
                         centroId, itemId, ESTADOS_NECESIDAD_ABIERTA
                 )
                 .ifPresent(necesidad -> {
-                    int confirmada = valorSeguro(donacionRepository.sumCantidadPorCentroItemYEstados(
+                    long confirmada = valorSeguro(donacionRepository.sumCantidadPorCentroItemYEstados(
                             centroId, itemId, List.of(EstadoDonacion.CONFIRMADA)
                     ));
 
@@ -102,13 +102,13 @@ public class DonacionCapacidadService {
                 });
     }
 
-    private static int valorSeguro(Integer value) {
-        return value != null ? value : 0;
+    private static long valorSeguro(Long value) {
+        return value != null ? value : 0L;
     }
 
     DonationQuotaResponse toQuota(UUID centroId, Necesidad necesidad) {
-        int comprometida = calcularCantidadComprometida(centroId, necesidad.getItemId());
-        int maxima = Math.max(0, necesidad.getCantidadNecesaria() - comprometida);
+        long comprometida = calcularCantidadComprometida(centroId, necesidad.getItemId());
+        long maxima = Math.max(0L, necesidad.getCantidadNecesaria() - comprometida);
         return new DonationQuotaResponse(
                 necesidad.getItemId(),
                 necesidad.getId(),

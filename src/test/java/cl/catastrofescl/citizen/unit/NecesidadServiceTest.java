@@ -62,14 +62,14 @@ class NecesidadServiceTest {
 
     @Test
     void crearManual_persisteNecesidadActiva() {
-        var request = new CreateNeedRequest(centroId, itemId, null, 10, PrioridadNecesidad.ALTO);
+        var request = new CreateNeedRequest(centroId, itemId, null, 10L, PrioridadNecesidad.ALTO);
 
         when(necesidadRepository.save(any(Necesidad.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(necesidadMapper.toResponse(any(Necesidad.class), eq(0))).thenAnswer(invocation -> {
+        when(necesidadMapper.toResponse(any(Necesidad.class), eq(0L))).thenAnswer(invocation -> {
             Necesidad n = invocation.getArgument(0);
             return new cl.catastrofescl.citizen.dto.response.NeedResponse(
                     n.getId(), n.getCentroId(), n.getItemId(), n.getEmergenciaId(),
-                    n.getCantidadNecesaria(), 0, n.getCantidadNecesaria(),
+                    n.getCantidadNecesaria(), 0L, n.getCantidadNecesaria(),
                     n.getPrioridad(), n.getOrigen(), n.getEstado(),
                     n.getCreadaEn(), n.getResueltaEn()
             );
@@ -91,7 +91,7 @@ class NecesidadServiceTest {
     @Test
     void crearAutomatica_cuandoDuplicada_lanzaDuplicateNeedException() {
         var event = new StockCriticalEvent(
-                UUID.randomUUID(), centroId, itemId, null, 0, "CRITICO", 5
+                UUID.randomUUID(), centroId, itemId, null, 0L, "CRITICO", 5L
         );
         when(necesidadRepository.existsByCentroIdAndItemIdAndEstadoIn(eq(centroId), eq(itemId), any()))
                 .thenReturn(true);
@@ -105,15 +105,15 @@ class NecesidadServiceTest {
     @Test
     void crearAutomatica_mapeaPrioridadCriticaDesdeAgotado() {
         var event = new StockCriticalEvent(
-                UUID.randomUUID(), centroId, itemId, null, 0, "AGOTADO", 3
+                UUID.randomUUID(), centroId, itemId, null, 0L, "AGOTADO", 3L
         );
         when(necesidadRepository.existsByCentroIdAndItemIdAndEstadoIn(any(), any(), any())).thenReturn(false);
         when(necesidadRepository.save(any(Necesidad.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(necesidadMapper.toResponse(any(Necesidad.class), eq(0))).thenAnswer(invocation -> {
+        when(necesidadMapper.toResponse(any(Necesidad.class), eq(0L))).thenAnswer(invocation -> {
             Necesidad n = invocation.getArgument(0);
             return new cl.catastrofescl.citizen.dto.response.NeedResponse(
                     n.getId(), n.getCentroId(), n.getItemId(), n.getEmergenciaId(),
-                    n.getCantidadNecesaria(), 0, n.getCantidadNecesaria(),
+                    n.getCantidadNecesaria(), 0L, n.getCantidadNecesaria(),
                     n.getPrioridad(), n.getOrigen(), n.getEstado(),
                     n.getCreadaEn(), n.getResueltaEn()
             );
@@ -131,7 +131,7 @@ class NecesidadServiceTest {
                 .id(UUID.randomUUID())
                 .centroId(centroId)
                 .itemId(itemId)
-                .cantidadNecesaria(5)
+                .cantidadNecesaria(5L)
                 .prioridad(PrioridadNecesidad.MEDIO)
                 .origen(OrigenNecesidad.MANUAL)
                 .estado(EstadoNecesidad.ACTIVA)
@@ -140,10 +140,10 @@ class NecesidadServiceTest {
 
         when(necesidadRepository.findByEstadoIn(any(), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(necesidad)));
-        when(donacionCapacidadService.calcularCantidadComprometida(centroId, itemId)).thenReturn(2);
-        when(necesidadMapper.toResponse(necesidad, 2)).thenReturn(
+        when(donacionCapacidadService.calcularCantidadComprometida(centroId, itemId)).thenReturn(2L);
+        when(necesidadMapper.toResponse(necesidad, 2L)).thenReturn(
                 new cl.catastrofescl.citizen.dto.response.NeedResponse(
-                        necesidad.getId(), centroId, itemId, null, 5, 2, 3,
+                        necesidad.getId(), centroId, itemId, null, 5L, 2L, 3L,
                         PrioridadNecesidad.MEDIO, OrigenNecesidad.MANUAL, EstadoNecesidad.ACTIVA,
                         necesidad.getCreadaEn(), null
                 )
