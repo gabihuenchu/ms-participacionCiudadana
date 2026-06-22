@@ -23,3 +23,20 @@
 - [x] Ruta gateway: `/necesidades/**`, `/donaciones/**` → `ms-citizen:8084`
 - [x] Servicios/hooks en `frontend-info` (`citizen.service.ts`, `usePublicNeeds`, `useDonations`)
 - [ ] UI wizard de donación en frontend-info
+
+### MS-Notificacion (Kamilo14) — eventos RabbitMQ
+
+Rama Gitflow: `feature/integracion-participacion-ciudadana` → PR a `develop`.
+
+| Rol | Routing key | Exchange |
+|-----|-------------|----------|
+| **Publica** ms-citizen | `donation.created`, `donation.confirmed`, `need.created` | `catastrofescl.events` |
+| **Consume** ms-citizen | `stock.critical` | cola `stock.critical.queue` |
+| **Consume** [MS-Notificacion](https://github.com/Kamilo14/MS-Notificacion) | todos (`notifications.queue` binding `#`) | mismo exchange |
+
+Campos clave para notificaciones in-app (`ProcesadorEventosNotificacion`):
+
+- `donation.created` / `donation.confirmed` → `eventId`, `usuarioDonanteId`, `codigoQr`, `donadoEn` / `confirmadoEn`
+- `need.created` (manual) → `eventId`, `usuarioId`
+
+Validación local: levantar RabbitMQ + ms-citizen + MS-Notificacion en `:8086`; registrar donación y ver mensaje en cola `notifications.queue`.

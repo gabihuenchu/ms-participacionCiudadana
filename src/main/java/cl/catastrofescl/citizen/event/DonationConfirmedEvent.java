@@ -8,6 +8,7 @@ public record DonationConfirmedEvent(
         UUID eventId,
         UUID donacionId,
         UUID centroId,
+        UUID usuarioDonanteId,
         UUID confirmadoPorUsuarioId,
         String codigoQr,
         List<DonationCreatedEvent.DonationItemPayload> items,

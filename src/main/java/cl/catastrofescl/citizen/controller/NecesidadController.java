@@ -4,6 +4,7 @@ import cl.catastrofescl.citizen.dto.request.CreateNeedRequest;
 import cl.catastrofescl.citizen.dto.response.DonationQuotaResponse;
 import cl.catastrofescl.citizen.dto.response.NeedResponse;
 import cl.catastrofescl.citizen.dto.response.PageResponse;
+import cl.catastrofescl.citizen.security.UserContext;
 import cl.catastrofescl.citizen.service.DonacionCapacidadService;
 import cl.catastrofescl.citizen.service.NecesidadService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -58,7 +59,7 @@ public class NecesidadController {
     @PreAuthorize("hasAuthority('NECESIDAD_GESTIONAR')")
     @Operation(summary = "Registrar una necesidad de recursos (manual)")
     public ResponseEntity<NeedResponse> crear(@Valid @RequestBody CreateNeedRequest request) {
-        NeedResponse response = necesidadService.crearManual(request);
+        NeedResponse response = necesidadService.crearManual(request, UserContext.obtenerUsuarioId());
         return ResponseEntity
                 .created(URI.create("/necesidades/" + response.id()))
                 .body(response);

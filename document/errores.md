@@ -2,7 +2,13 @@
 
 ## Abiertos
 
-_(ninguno)_
+### [ERR-008] Cola RabbitMQ `stock.critical.queue` incompatible con DLQ
+
+- **Fecha:** 2026-06-22
+- **Severidad:** 🟡 Media
+- **Descripción:** Al arrancar con RabbitMQ que ya tenía la cola sin `x-dead-letter-exchange`, Spring AMQP falla con `PRECONDITION_FAILED (406)`. El consumidor `stock.critical` no se conecta.
+- **Workaround:** Borrar cola en RabbitMQ Management o `docker compose down -v`.
+- **Referencia:** `document/registro-bugs-qa.md` · TC-CIT-013
 
 ## Resueltos
 

@@ -54,14 +54,15 @@ public class NecesidadService {
     }
 
     @Transactional
-    public NeedResponse crearManual(CreateNeedRequest request) {
+    public NeedResponse crearManual(CreateNeedRequest request, UUID usuarioId) {
         return crearNecesidad(
                 request.centroId(),
                 request.itemId(),
                 request.emergenciaId(),
                 request.cantidadNecesaria(),
                 request.prioridad(),
-                OrigenNecesidad.MANUAL
+                OrigenNecesidad.MANUAL,
+                usuarioId
         );
     }
 
@@ -83,7 +84,8 @@ public class NecesidadService {
                 event.emergenciaId(),
                 cantidad,
                 prioridad,
-                OrigenNecesidad.AUTOMATICO
+                OrigenNecesidad.AUTOMATICO,
+                null
         );
     }
 
@@ -93,7 +95,8 @@ public class NecesidadService {
             UUID emergenciaId,
             long cantidad,
             PrioridadNecesidad prioridad,
-            OrigenNecesidad origen
+            OrigenNecesidad origen,
+            UUID usuarioId
     ) {
         OffsetDateTime ahora = OffsetDateTime.now();
         Necesidad necesidad = Necesidad.builder()
@@ -119,6 +122,7 @@ public class NecesidadService {
                 guardada.getCantidadNecesaria(),
                 guardada.getPrioridad(),
                 guardada.getOrigen(),
+                usuarioId,
                 guardada.getCreadaEn()
         ));
 

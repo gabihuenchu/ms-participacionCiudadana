@@ -73,7 +73,7 @@ class DonacionFlowIntegrationTest {
 
         necesidadService.crearManual(new CreateNeedRequest(
                 centroId, itemId, null, 10L, PrioridadNecesidad.MEDIO
-        ));
+        ), UUID.randomUUID());
 
         var request = new CreateDonationRequest(
                 centroId,

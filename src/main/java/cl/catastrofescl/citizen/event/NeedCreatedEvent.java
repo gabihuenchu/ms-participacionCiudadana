@@ -15,6 +15,7 @@ public record NeedCreatedEvent(
         Long cantidadNecesaria,
         PrioridadNecesidad prioridad,
         OrigenNecesidad origen,
+        UUID usuarioId,
         OffsetDateTime creadaEn
 ) {
 }

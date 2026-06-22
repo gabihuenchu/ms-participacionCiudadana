@@ -117,6 +117,7 @@ public class DonacionService {
                 UUID.randomUUID(),
                 guardada.getId(),
                 guardada.getCentroId(),
+                guardada.getUsuarioDonanteId(),
                 operadorId,
                 guardada.getCodigoQr(),
                 itemsPayload,

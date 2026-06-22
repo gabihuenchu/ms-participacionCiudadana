@@ -75,7 +75,7 @@ class NecesidadServiceTest {
             );
         });
 
-        var response = necesidadService.crearManual(request);
+        var response = necesidadService.crearManual(request, UUID.randomUUID());
 
         ArgumentCaptor<Necesidad> captor = ArgumentCaptor.forClass(Necesidad.class);
         verify(necesidadRepository).save(captor.capture());

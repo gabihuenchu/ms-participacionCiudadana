@@ -6,6 +6,7 @@ import cl.catastrofescl.citizen.dto.response.DonationResponse;
 import cl.catastrofescl.citizen.entity.Donacion;
 import cl.catastrofescl.citizen.entity.EstadoDonacion;
 import cl.catastrofescl.citizen.entity.ItemDonacion;
+import cl.catastrofescl.citizen.event.DonationConfirmedEvent;
 import cl.catastrofescl.citizen.exception.DonationAlreadyConfirmedException;
 import cl.catastrofescl.citizen.exception.DonationNotFoundException;
 import cl.catastrofescl.citizen.repository.DonacionRepository;
@@ -103,7 +104,11 @@ class DonacionServiceTest {
         assertThat(response.estado()).isEqualTo(EstadoDonacion.CONFIRMADA);
         assertThat(response.confirmadoPorUsuarioId()).isEqualTo(operadorId);
         verify(donacionCapacidadService).actualizarNecesidadTrasConfirmacion(centroId, itemId);
-        verify(eventPublisher).publicar(eq("donation.confirmed"), any());
+
+        ArgumentCaptor<DonationConfirmedEvent> eventCaptor = ArgumentCaptor.forClass(DonationConfirmedEvent.class);
+        verify(eventPublisher).publicar(eq("donation.confirmed"), eventCaptor.capture());
+        assertThat(eventCaptor.getValue().usuarioDonanteId()).isEqualTo(donanteId);
+        assertThat(eventCaptor.getValue().confirmadoPorUsuarioId()).isEqualTo(operadorId);
     }
 
     @Test
