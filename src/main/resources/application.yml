@@ -6,8 +6,8 @@ spring:
     name: ms-citizen
 
   datasource:
-    # BD compartida del monorepo: catastrofecl (misma que ms-resources, fuente de verdad del inventario)
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/catastrofecl}
+    # BD compartida del monorepo: catastrofescl (misma que ms-resources, fuente de verdad del inventario)
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/catastrofescl}
     username: ${DATABASE_USERNAME:postgres}
     password: ${DATABASE_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver

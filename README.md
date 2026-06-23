@@ -6,7 +6,7 @@ Microservicio **MS-4** del ecosistema CatástrofesCL. Gestiona necesidades de re
 |----------|-------|
 | Puerto | `8084` |
 | Gateway | `/necesidades/**`, `/donaciones/**` → `http://ms-citizen:8084` |
-| Base de datos | `catastrofecl` (PostgreSQL compartida; Flyway: `flyway_schema_history_citizen`) |
+| Base de datos | `catastrofescl` (PostgreSQL compartida; Flyway: `flyway_schema_history_citizen`) |
 
 ## APIs críticas
 
@@ -38,14 +38,14 @@ Microservicio **MS-4** del ecosistema CatástrofesCL. Gestiona necesidades de re
 ### Variables de entorno
 
 ```bash
-DATABASE_URL=jdbc:postgresql://localhost:5432/catastrofecl
+DATABASE_URL=jdbc:postgresql://localhost:5432/catastrofescl
 DATABASE_USERNAME=postgres
 DATABASE_PASSWORD=postgres
 RABBITMQ_HOST=localhost
 FIREBASE_ENABLED=false
 ```
 
-> En el monorepo `CATASTROFECL-MS`, Docker usa `host.docker.internal:5432/catastrofecl` vía `compose.yaml` + `compose.override.yaml`.
+> En el monorepo `CATASTROFECL-MS`, Docker usa `host.docker.internal:5432/catastrofescl` vía `compose.yaml` + `compose.override.yaml`.
 
 ### Ejecutar
 
