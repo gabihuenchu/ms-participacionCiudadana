@@ -56,14 +56,24 @@ public class FirebaseTokenFilter extends OncePerRequestFilter {
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();
         Map<String, Object> claims = token.getClaims();
 
+        List<String> roles = new ArrayList<>();
         Object rolesClaim = claims.get("roles");
-        if (rolesClaim instanceof List<?> roles) {
-            roles.stream()
-                    .map(Object::toString)
-                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-                    .forEach(authorities::add);
+        if (rolesClaim instanceof List<?> rolesList) {
+            for (Object rol : rolesList) {
+                String interno = MapeadorPermisosPorRol.normalizarRol(rol.toString());
+                if (interno == null) {
+                    continue;
+                }
+                roles.add(interno);
+                authorities.add(new SimpleGrantedAuthority("ROLE_" + interno));
+            }
         }
 
+        // ms-identity solo escribe el claim roles; derivamos los permisos de ciudadania del rol.
+        MapeadorPermisosPorRol.permisosPara(roles)
+                .forEach(permiso -> authorities.add(new SimpleGrantedAuthority(permiso)));
+
+        // Compatibilidad: si el token llegara con permisos explicitos, tambien se respetan.
         Object permissionsClaim = claims.get("permissions");
         if (permissionsClaim instanceof List<?> permissions) {
             permissions.stream()
