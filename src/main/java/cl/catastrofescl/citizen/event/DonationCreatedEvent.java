@@ -13,6 +13,6 @@ public record DonationCreatedEvent(
         List<DonationItemPayload> items,
         OffsetDateTime donadoEn
 ) {
-    public record DonationItemPayload(UUID itemId, Integer cantidad) {
+    public record DonationItemPayload(UUID itemId, Long cantidad) {
     }
 }

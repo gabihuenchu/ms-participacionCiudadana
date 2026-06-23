@@ -32,11 +32,16 @@ public class DevAuthFilter extends OncePerRequestFilter {
 
                 String roles = request.getHeader(HEADER_ROLES);
                 if (roles != null && !roles.isBlank()) {
-                    Arrays.stream(roles.split(","))
+                    List<String> rolesInternos = Arrays.stream(roles.split(","))
                             .map(String::trim)
                             .filter(s -> !s.isEmpty())
-                            .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-                            .forEach(authorities::add);
+                            .map(MapeadorPermisosPorRol::normalizarRol)
+                            .filter(java.util.Objects::nonNull)
+                            .toList();
+                    rolesInternos.forEach(rol -> authorities.add(new SimpleGrantedAuthority("ROLE_" + rol)));
+                    // Permisos derivados del rol (espejo del seed de ms-identity).
+                    MapeadorPermisosPorRol.permisosPara(rolesInternos)
+                            .forEach(permiso -> authorities.add(new SimpleGrantedAuthority(permiso)));
                 }
 
                 String permissions = request.getHeader(HEADER_PERMISSIONS);

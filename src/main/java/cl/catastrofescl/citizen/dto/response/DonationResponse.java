@@ -15,6 +15,8 @@ public record DonationResponse(
         OffsetDateTime donadoEn,
         OffsetDateTime confirmadoEn,
         UUID confirmadoPorUsuarioId,
+        /** Suma de cantidades de todos los ítems de la donación. */
+        Long cantidadTotal,
         List<DonationItemResponse> items
 ) {
 }

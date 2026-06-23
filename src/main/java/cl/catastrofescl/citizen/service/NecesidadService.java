@@ -10,7 +10,7 @@ import cl.catastrofescl.citizen.entity.PrioridadNecesidad;
 import cl.catastrofescl.citizen.event.NeedCreatedEvent;
 import cl.catastrofescl.citizen.event.StockCriticalEvent;
 import cl.catastrofescl.citizen.exception.DuplicateNeedException;
-import cl.catastrofescl.citizen.repository.NeedRepository;
+import cl.catastrofescl.citizen.repository.NecesidadRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,28 +24,32 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class NeedService {
+public class NecesidadService {
 
     private static final List<EstadoNecesidad> ESTADOS_PUBLICOS = List.of(
             EstadoNecesidad.ACTIVA,
             EstadoNecesidad.PARCIALMENTE_CUBIERTA
     );
 
-    private final NeedRepository needRepository;
-    private final NeedMapper needMapper;
+    private final NecesidadRepository necesidadRepository;
+    private final NecesidadMapper necesidadMapper;
     private final EventPublisher eventPublisher;
+    private final DonacionCapacidadService donacionCapacidadService;
 
     @Transactional(readOnly = true)
     public PageResponse<NeedResponse> listarPublicas(int page, int size) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "prioridad", "creadaEn"));
-        Page<Necesidad> result = needRepository.findByEstadoIn(ESTADOS_PUBLICOS, pageable);
+        Page<Necesidad> result = necesidadRepository.findByEstadoIn(ESTADOS_PUBLICOS, pageable);
         return toPageResponse(result);
     }
 
     @Transactional(readOnly = true)
     public List<NeedResponse> listarPorCentro(UUID centroId) {
-        return needRepository.findByCentroIdAndEstadoIn(centroId, ESTADOS_PUBLICOS).stream()
-                .map(needMapper::toResponse)
+        return necesidadRepository.findByCentroIdAndEstadoIn(centroId, ESTADOS_PUBLICOS).stream()
+                .map(n -> necesidadMapper.toResponse(
+                        n,
+                        donacionCapacidadService.calcularCantidadComprometida(centroId, n.getItemId())
+                ))
                 .toList();
     }
 
@@ -64,11 +68,11 @@ public class NeedService {
     @Transactional
     public NeedResponse crearAutomatica(StockCriticalEvent event) {
         PrioridadNecesidad prioridad = mapearPrioridad(event.nivelCriticidad());
-        int cantidad = event.cantidadSugerida() != null && event.cantidadSugerida() > 0
+        long cantidad = event.cantidadSugerida() != null && event.cantidadSugerida() > 0
                 ? event.cantidadSugerida()
-                : 1;
+                : 1L;
 
-        if (needRepository.existsByCentroIdAndItemIdAndEstadoIn(
+        if (necesidadRepository.existsByCentroIdAndItemIdAndEstadoIn(
                 event.centroId(), event.itemId(), ESTADOS_PUBLICOS)) {
             throw new DuplicateNeedException(event.centroId(), event.itemId());
         }
@@ -87,7 +91,7 @@ public class NeedService {
             UUID centroId,
             UUID itemId,
             UUID emergenciaId,
-            int cantidad,
+            long cantidad,
             PrioridadNecesidad prioridad,
             OrigenNecesidad origen
     ) {
@@ -104,7 +108,7 @@ public class NeedService {
                 .creadaEn(ahora)
                 .build();
 
-        Necesidad guardada = needRepository.save(necesidad);
+        Necesidad guardada = necesidadRepository.save(necesidad);
 
         eventPublisher.publicar("need.created", new NeedCreatedEvent(
                 UUID.randomUUID(),
@@ -118,7 +122,7 @@ public class NeedService {
                 guardada.getCreadaEn()
         ));
 
-        return needMapper.toResponse(guardada);
+        return necesidadMapper.toResponse(guardada, 0L);
     }
 
     private PrioridadNecesidad mapearPrioridad(String nivelCriticidad) {
@@ -135,7 +139,12 @@ public class NeedService {
 
     private PageResponse<NeedResponse> toPageResponse(Page<Necesidad> page) {
         return new PageResponse<>(
-                page.getContent().stream().map(needMapper::toResponse).toList(),
+                page.getContent().stream()
+                        .map(n -> necesidadMapper.toResponse(
+                                n,
+                                donacionCapacidadService.calcularCantidadComprometida(n.getCentroId(), n.getItemId())
+                        ))
+                        .toList(),
                 page.getNumber(),
                 page.getSize(),
                 page.getTotalElements(),

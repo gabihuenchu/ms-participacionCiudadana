@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class DonationMapper {
+public class DonacionMapper {
 
     public DonationResponse toResponse(Donacion donacion) {
         List<DonationItemResponse> items = donacion.getItems().stream()
@@ -25,6 +25,7 @@ public class DonationMapper {
                 donacion.getDonadoEn(),
                 donacion.getConfirmadoEn(),
                 donacion.getConfirmadoPorUsuarioId(),
+                items.stream().mapToLong(DonationItemResponse::cantidad).sum(),
                 items
         );
     }

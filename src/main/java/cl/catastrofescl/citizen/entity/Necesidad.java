@@ -37,7 +37,7 @@ public class Necesidad {
     private UUID emergenciaId;
 
     @Column(name = "cantidad_necesaria", nullable = false)
-    private Integer cantidadNecesaria;
+    private Long cantidadNecesaria;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
