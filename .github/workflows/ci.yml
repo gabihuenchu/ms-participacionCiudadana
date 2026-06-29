@@ -1,4 +1,4 @@
-name: CI ms-citizen
+name: CI ms-participacion-ciudadana
 
 on:
   push:
