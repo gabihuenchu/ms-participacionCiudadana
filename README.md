@@ -130,3 +130,20 @@ docker compose up --build
 ```
 
 PostgreSQL expone el puerto **5433** en el host (internamente `5432`).
+
+## AWS / DevOps (rama `aws`)
+
+| Recurso | Nombre |
+|---------|--------|
+| Repositorio GitHub | [gabihuenchu/ms-participacionCiudadana](https://github.com/gabihuenchu/ms-participacionCiudadana) |
+| Rama de despliegue | `aws` |
+| Imagen ECR | `catastrofescl/ms-participacion-ciudadana:latest` |
+| Workflow | `.github/workflows/docker-aws.yml` |
+
+**Secrets en GitHub Actions:** `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN`, `AWS_REGION`.
+
+Crear repositorio ECR (cuenta del laboratorio):
+
+```bash
+aws ecr create-repository --repository-name catastrofescl/ms-participacion-ciudadana
+```
