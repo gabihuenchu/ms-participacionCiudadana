@@ -11,6 +11,9 @@ RUN mvn package -DskipTests -B
 # Etapa 2: imagen liviana solo con el JRE
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
+RUN apk add --no-cache wget
 COPY --from=build /app/target/ms-citizen-*.jar app.jar
 EXPOSE 8084
+HEALTHCHECK --interval=30s --timeout=3s --start-period=30s --retries=3 \
+  CMD wget -qO- http://localhost:8084/actuator/health || exit 1
 ENTRYPOINT ["java", "-jar", "app.jar"]
